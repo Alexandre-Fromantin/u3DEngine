@@ -24,6 +24,8 @@ static const char* fragment_shader_text =
 "    fragment = vec4(color, 1.0);\n"
 "}\n";
 
+View* main_view_ptr = nullptr;
+
 static void error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
@@ -33,6 +35,21 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+    if (main_view_ptr && (action == GLFW_PRESS || action == GLFW_REPEAT)){
+        if (key == GLFW_KEY_UP && action == GLFW_REPEAT) {
+            main_view_ptr->translate(glm::vec3(0.0, 0.0, -0.1));
+        }
+        else if (key == GLFW_KEY_DOWN && action == GLFW_REPEAT) {
+            main_view_ptr->translate(glm::vec3(0.0, 0.0, 0.1));
+        }
+        else if (key == GLFW_KEY_LEFT && action == GLFW_REPEAT) {
+            main_view_ptr->translate(glm::vec3(-0.1, 0.0, 0.0));
+        }
+        else if (key == GLFW_KEY_RIGHT && action == GLFW_REPEAT) {
+            main_view_ptr->translate(glm::vec3(0.1, 0.0, 0.0));
+        }
+    }
 }
 
 #define USE_SECOND_FULL_SCREEN
@@ -92,6 +109,8 @@ int main(void)
     Cube cube = Cube();
     View view = View(projection_param, view_param);
 
+    main_view_ptr = &view;
+
     const GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
     glCompileShader(vertex_shader);
@@ -121,19 +140,16 @@ int main(void)
     glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
         sizeof(Vertex), (void*)offsetof(Vertex, col));
 
-    //cube.translate(glm::vec3(0, 0, -2));
+    cube.translate(glm::vec3(0, 0, -2));
 
     while (!glfwWindowShouldClose(window))
     {
-        cube.rotate(glm::vec3(0.f, 0.05f, 0.1f));
+        //cube.rotate(glm::vec3(0.f, 0.05f, 0.1f));
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(program);
         glBindVertexArray(vertex_array);
-
-        view.translate(glm::vec3(0.0, 0.0, -0.01));
-        view.rotate(glm::vec3(0.0, 0.05, 0.0));
 
         glm::mat4 view_projection_matrix = view.get_view_projection_matrix();
 
