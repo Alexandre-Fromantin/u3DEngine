@@ -1,20 +1,20 @@
 #pragma once
 
 #include "OpenGL.h"
-#include "vertex.h"
+#include <glm/mat4x4.hpp>
 
 class Cube {
 private:
     GLuint vertex_buffer;
     GLuint indice_buffer;
 
-    mat4x4 model;
+    glm::mat4 model;
 
 public:
     Cube();
 
-    void translate(float x, float y, float z);
-    void rotate(float x, float y, float z);
+    void translate(glm::vec3 translate_value);
+    void rotate(glm::vec3 rotate_value);
 
-    void draw(mat4x4 view_projection, GLuint mvp_location);
+    void draw(glm::mat4& view_projection_matrix, GLuint mvp_location);
 };

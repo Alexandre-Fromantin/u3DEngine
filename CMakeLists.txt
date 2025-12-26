@@ -15,12 +15,13 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/glad/cmake)
 glad_add_library(glad_gl_core_33 SHARED LOCATION ${CMAKE_SOURCE_DIR}/glad_generated API gl:core=3.3)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/glfw)
+add_subdirectory(${CMAKE_SOURCE_DIR}/glm)
 find_package(OpenGL REQUIRED)
 
-add_executable (${PROJECT_NAME} "main.cpp"  "linmath.h" "cube.cpp" "cube.h" "vertex.h" "main.h" "OpenGL.h" "view.h" "view.cpp")
+add_executable (${PROJECT_NAME} "main.cpp" "cube.cpp" "cube.h" "vertex.h" "main.h" "OpenGL.h" "view.cpp" "view.h")
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 23)
  
-target_link_libraries(${PROJECT_NAME} PRIVATE glad_gl_core_33 glfw OpenGL::GL)
+target_link_libraries(${PROJECT_NAME} PRIVATE glad_gl_core_33 glfw glm OpenGL::GL)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/glad_generated/include)

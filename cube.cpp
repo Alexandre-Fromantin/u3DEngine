@@ -1,4 +1,7 @@
 #include "cube.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include "vertex.h"
+#include <iostream>
 
 static const Vertex default_vertices[] =
 {
@@ -43,7 +46,7 @@ static const unsigned int default_indices[] = {
 
 Cube::Cube()
 {
-    mat4x4_identity(this->model);
+    this->model = glm::mat4(1.0);//identity matrix
 
     glGenBuffers(1, &this->vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, this->vertex_buffer);
@@ -54,21 +57,20 @@ Cube::Cube()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(default_indices), default_indices, GL_STATIC_DRAW);
 }
 
-void Cube::translate(float x, float y, float z) {
-    mat4x4_translate(this->model, x, y, z);
+void Cube::translate(glm::vec3 translate_value) {
+    this->model = glm::translate(this->model, translate_value);
 }
 
-void Cube::rotate(float x, float y, float z)
+void Cube::rotate(glm::vec3 rotate_value)
 {
-    float max_angle = fmax(fmax(x, y), z);
+    float max_angle = fmax(fmax(rotate_value.x, rotate_value.y), rotate_value.z);
 
-    mat4x4_rotate(this->model, this->model, x / max_angle, y / max_angle, z / max_angle, max_angle);
+    this->model = glm::rotate(this->model, max_angle, rotate_value / max_angle);
 }
 
-void Cube::draw(mat4x4 view_projection_matrix, GLuint mvp_location)
+void Cube::draw(glm::mat4& view_projection_matrix, GLuint mvp_location)
 {
-    mat4x4 mvp;
-    mat4x4_mul(mvp, view_projection_matrix, this->model);
+    glm::mat4 mvp = view_projection_matrix * this->model;
     glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*)&mvp);
 
     glBindBuffer(GL_ARRAY_BUFFER, this->vertex_buffer);

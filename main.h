@@ -2,8 +2,6 @@
 
 #include "OpenGL.h"
 
-#include "linmath.h"
-
 #include "vertex.h"
 #include "cube.h"
 

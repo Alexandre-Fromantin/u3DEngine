@@ -1,9 +1,9 @@
 #pragma once
 
-#include "linmath.h"
+#include <glm/vec3.hpp>
 
 typedef struct Vertex
 {
-    vec3 pos;
-    vec3 col;
+    glm::vec3 pos;
+    glm::vec3 col;
 } Vertex;

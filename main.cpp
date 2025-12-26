@@ -1,4 +1,7 @@
 ﻿#include "main.h"
+#include "view.h"
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
 
 static const char* vertex_shader_text =
 "#version 330\n"
@@ -53,9 +56,9 @@ int main(void)
 
     glfwWindowHint(GLFW_CENTER_CURSOR, GLFW_FALSE);
     glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
-    GLFWwindow* window = glfwCreateWindow(monitor_video_mode->width, monitor_video_mode->height, "OpenGL Triangle", second_monitor_ptr, NULL);
+    GLFWwindow* window = glfwCreateWindow(monitor_video_mode->width, monitor_video_mode->height, "OpenGL Window", second_monitor_ptr, NULL);
 #else
-    GLFWwindow* window = glfwCreateWindow(700, 700, "OpenGL Triangle", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(700, 700, "OpenGL Window", NULL, NULL);
 #endif
     if (!window)
     {
@@ -71,13 +74,23 @@ int main(void)
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    const float ratio = width / (float)height;
+    const float aspect = width / (float)height;
 
     glViewport(0, 0, width, height);
 
     glEnable(GL_DEPTH_TEST);
 
+    ProjectionParameter projection_param = {
+            .fov_angle = glm::radians(90.f),
+            .aspect = aspect
+    };
+    ViewParameter view_param = {
+            .position = glm::vec3(0.0, 0.0, 0.0),
+            .rotation = glm::vec3(0.0, 0.0, 0.0)
+    };
+
     Cube cube = Cube();
+    View view = View(projection_param, view_param);
 
     const GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
@@ -108,21 +121,21 @@ int main(void)
     glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
         sizeof(Vertex), (void*)offsetof(Vertex, col));
 
-    cube.translate(0, 0, -2);
+    //cube.translate(glm::vec3(0, 0, -2));
 
     while (!glfwWindowShouldClose(window))
     {
+        cube.rotate(glm::vec3(0.f, 0.05f, 0.1f));
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        mat4x4 view_projection_matrix, view_matrix, projection_matrix;
-        mat4x4_identity(view_matrix);
-        cube.rotate(0, 0.05, 0.05);
-        mat4x4_perspective(projection_matrix, 60.f * 3.14 / 180.0, ratio, 0.1f, 100.f);
-        mat4x4_mul(view_projection_matrix, view_matrix, projection_matrix);
-
         glUseProgram(program);
         glBindVertexArray(vertex_array);
+
+        view.translate(glm::vec3(0.0, 0.0, -0.01));
+        view.rotate(glm::vec3(0.0, 0.05, 0.0));
+
+        glm::mat4 view_projection_matrix = view.get_view_projection_matrix();
 
         cube.draw(view_projection_matrix, mvp_location);
 
