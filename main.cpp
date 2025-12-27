@@ -2,6 +2,7 @@
 #include "view.h"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
+#include "cylinder.h"
 
 static const char* vertex_shader_text =
 "#version 330\n"
@@ -61,8 +62,8 @@ int main(void)
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef USE_SECOND_FULL_SCREEN
@@ -87,7 +88,7 @@ int main(void)
 
     glfwMakeContextCurrent(window);
     gladLoadGL(glfwGetProcAddress);
-    glfwSwapInterval(1);//vsync
+    glfwSwapInterval(6);//vsync
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
@@ -106,9 +107,7 @@ int main(void)
             .rotation = glm::vec3(0.0, 0.0, 0.0)
     };
 
-    Cube cube = Cube();
     View view = View(projection_param, view_param);
-
     main_view_ptr = &view;
 
     const GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -128,20 +127,25 @@ int main(void)
     const GLint vpos_location = glGetAttribLocation(program, "vPos");
     const GLint vcol_location = glGetAttribLocation(program, "vCol");
 
-    GLuint vertex_array;
-    glGenVertexArrays(1, &vertex_array);
-    glBindVertexArray(vertex_array);
+    Cube cube = Cube();
 
-    glEnableVertexAttribArray(vpos_location);
-    glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex), (void*)offsetof(Vertex, pos));
+    GLuint VAO;
+    glCreateVertexArrays(1, &VAO);
 
-    glEnableVertexAttribArray(vcol_location);
-    glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex), (void*)offsetof(Vertex, col));
+    glEnableVertexArrayAttrib(VAO, vpos_location);
+    glVertexArrayAttribFormat(VAO, vpos_location, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(VAO, vpos_location, 0);
+
+    glEnableVertexArrayAttrib(VAO, vcol_location);
+    glVertexArrayAttribFormat(VAO, vcol_location, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float));
+    glVertexArrayAttribBinding(VAO, vcol_location, 0);
+
+    Cylinder cylinder = Cylinder(16);
 
     cube.translate(glm::vec3(0, 0, -2));
+    cylinder.translate(glm::vec3(0, 0, -1));
 
+    uint32_t nb_side_drawed = 0;
     while (!glfwWindowShouldClose(window))
     {
         //cube.rotate(glm::vec3(0.f, 0.05f, 0.1f));
@@ -149,14 +153,17 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(program);
-        glBindVertexArray(vertex_array);
+        glBindVertexArray(VAO);
 
         glm::mat4 view_projection_matrix = view.get_view_projection_matrix();
 
-        cube.draw(view_projection_matrix, mvp_location);
+        cylinder.draw(view_projection_matrix, mvp_location, VAO, nb_side_drawed%(2+2+2*16  +1));
+        //cube.draw(view_projection_matrix, mvp_location, VAO);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        nb_side_drawed++;
     }
 
     glfwDestroyWindow(window);

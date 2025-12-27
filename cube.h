@@ -16,5 +16,5 @@ public:
     void translate(glm::vec3 translate_value);
     void rotate(glm::vec3 rotate_value);
 
-    void draw(glm::mat4& view_projection_matrix, GLuint mvp_location);
+    void draw(glm::mat4& view_projection_matrix, GLuint mvp_location, GLuint VAO);
 };
