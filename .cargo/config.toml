@@ -1,0 +1,2 @@
+[env]
+VULKAN_SDK = "$VK_SDK_PATH"
