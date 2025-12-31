@@ -12,8 +12,8 @@ fn main() {
 
     app.run();
 }
-/*
 
+/*
     let hwnd = window.get_win32_window() as isize;
     let create_surface_info = Win32SurfaceCreateInfoKHR {
         hwnd,

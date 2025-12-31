@@ -4,13 +4,14 @@ use glfw::{GlfwReceiver, PWindow, WindowEvent, WindowMode};
 
 use crate::{
     glfw::GlfwEntry,
-    vulkan::{entry::VulkanEntry, instance::VulkanInstance},
+    vulkan::{entry::VulkanEntry, instance::VulkanInstance, surface::VulkanSurface},
 };
 
 pub struct Application {
     glfw_window: PWindow,
     glfw_events: GlfwReceiver<(f64, WindowEvent)>,
     vulkan_instance: VulkanInstance,
+    vulkan_surface: VulkanSurface,
 }
 
 impl Application {
@@ -39,10 +40,14 @@ impl Application {
 
         let vulkan_instance = VulkanInstance::new_from_glfw(vulkan_entry, glfw_entry);
 
+        let vulkan_surface =
+            VulkanSurface::new_from_glfw_window(vulkan_entry, &vulkan_instance, &window);
+
         Application {
             glfw_window: window,
             glfw_events: events,
             vulkan_instance,
+            vulkan_surface,
         }
     }
 

@@ -1,4 +1,7 @@
-use std::ffi::{CStr, c_char};
+use std::{
+    ffi::{CStr, c_char},
+    ops::Deref,
+};
 
 use ash::vk;
 
@@ -39,5 +42,13 @@ impl VulkanInstance {
         let instance = unsafe { vulkan_entry.create_instance(&instance_create_info, None) }
             .expect("failed to create Vulkan instance");
         Self { instance }
+    }
+}
+
+impl Deref for VulkanInstance {
+    type Target = ash::Instance;
+
+    fn deref(&self) -> &Self::Target {
+        &self.instance
     }
 }
