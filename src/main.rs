@@ -1,127 +1,18 @@
-use std::{ffi::CStr, fs::File, io::Read, process::exit};
+use crate::{app::Application, glfw::GlfwEntry, vulkan::entry::VulkanEntry};
 
-use ash::{
-    khr::{surface, swapchain, win32_surface},
-    vk::{
-        self, DeviceCreateInfo, DeviceQueueCreateInfo, PipelineShaderStageCreateInfo,
-        PresentModeKHR, QueueFlags, ShaderModule, ShaderModuleCreateInfo, ShaderStageFlags,
-        StructureType, SurfaceCapabilitiesKHR, SurfaceFormatKHR, SurfaceKHR,
-        SwapchainCreateInfoKHR, Win32SurfaceCreateInfoKHR,
-    },
-};
-use glfw::WindowMode;
-
-static VALIDATION_LAYER_NAME: &CStr =
-    unsafe { CStr::from_bytes_with_nul_unchecked(b"VK_LAYER_KHRONOS_validation\0") };
+mod app;
+mod glfw;
+mod vulkan;
 
 fn main() {
-    let mut glfw = glfw::init(glfw::fail_on_errors).unwrap();
+    let mut glfw_entry = GlfwEntry::init();
+    let vulkan_entry = VulkanEntry::init();
 
-    glfw.window_hint(glfw::WindowHint::ClientApi(glfw::ClientApiHint::NoApi));
-    glfw.window_hint(glfw::WindowHint::CenterCursor(false));
-    glfw.window_hint(glfw::WindowHint::AutoIconify(false));
+    let app = Application::new(&mut glfw_entry, &vulkan_entry, "u3DEngine(Vulkan)");
 
-    let (mut window, events) = glfw
-        .with_connected_monitors(|glfw, monitors| {
-            if monitors.len() > 1 {
-                let second_monitor = &monitors[1];
-                let video_mode_opt = second_monitor.get_video_mode();
-                if let Some(video_mode) = video_mode_opt {
-                    return glfw.create_window(
-                        video_mode.width,
-                        video_mode.height,
-                        "u3DEngine(Vulkan)",
-                        WindowMode::FullScreen(second_monitor),
-                    );
-                }
-            }
-            glfw.create_window(700, 700, "u3DEngine(Vulkan)", WindowMode::Windowed)
-        })
-        .expect("failed to create window");
-
-    let vulkan_entry = ash::Entry::linked(); //link Vulkan library at compile time
-
-    let required_instance_layer = [VALIDATION_LAYER_NAME];
-
-    let app_info = vk::ApplicationInfo::default();
-    let mut create_instance_info = vk::InstanceCreateInfo {
-        p_application_info: &app_info,
-        enabled_layer_count: required_instance_layer.len() as u32,
-        pp_enabled_layer_names: required_instance_layer.as_ptr() as *const *const i8,
-        ..Default::default()
-    };
-
-    let available_vulkan_extensions =
-        unsafe { vulkan_entry.enumerate_instance_extension_properties(None) }
-            .expect("failed to get available Vulkan instance extension");
-
-    let mut available_vulkan_extensions_name =
-        Vec::with_capacity(available_vulkan_extensions.len());
-
-    println!("Available Vulkan instance extensions:");
-    for available_vulkan_extension in available_vulkan_extensions {
-        let available_vulkan_extension_name =
-            unsafe { CStr::from_ptr(available_vulkan_extension.extension_name.as_ptr()) }
-                .to_string_lossy()
-                .into_owned();
-
-        println!("- {}", available_vulkan_extension_name);
-        available_vulkan_extensions_name.push(available_vulkan_extension_name);
-    }
-    println!();
-
-    let mut one_or_more_extension_missing = false;
-    println!("Vulkan instance extension required by GLFW:");
-    unsafe {
-        let mut count = 0;
-        let required_instance_extension = glfw::ffi::glfwGetRequiredInstanceExtensions(&mut count);
-
-        create_instance_info.enabled_extension_count = count;
-        create_instance_info.pp_enabled_extension_names = required_instance_extension;
-
-        for i in 0..(count as usize) {
-            let extension_name_c_char = *required_instance_extension.wrapping_add(i);
-            let extension_name = CStr::from_ptr(extension_name_c_char)
-                .to_string_lossy()
-                .into_owned();
-
-            let mut extension_missing = true;
-            for available_vulkan_extension_name in available_vulkan_extensions_name.iter() {
-                if *available_vulkan_extension_name == extension_name {
-                    extension_missing = false;
-                    break;
-                }
-            }
-
-            if extension_missing {
-                one_or_more_extension_missing = true;
-                println!("- {} (missing)", extension_name)
-            } else {
-                println!("- {} (present)", extension_name)
-            }
-        }
-    }
-    println!();
-
-    if one_or_more_extension_missing {
-        println!("Missing one or more extensions required by GLFW");
-        exit(-1)
-    }
-
-    println!("Available Vulkan instance layers:");
-    let available_instance_layers = unsafe { vulkan_entry.enumerate_instance_layer_properties() }
-        .expect("failed to get available Vulkan instance layers");
-    for available_instance_layer in available_instance_layers {
-        let layer_name = unsafe { CStr::from_ptr(available_instance_layer.layer_name.as_ptr()) }
-            .to_string_lossy()
-            .into_owned();
-
-        println!("- {}", layer_name);
-    }
-    println!();
-
-    let vulkan_instance = unsafe { vulkan_entry.create_instance(&create_instance_info, None) }
-        .expect("failed to create Vulkan instance");
+    app.run();
+}
+/*
 
     let hwnd = window.get_win32_window() as isize;
     let create_surface_info = Win32SurfaceCreateInfoKHR {
@@ -465,3 +356,4 @@ fn load_shader_module(logical_device: &ash::Device, name: &str) -> ShaderModule 
     unsafe { logical_device.create_shader_module(&shader_module_create_info, None) }
         .expect("failed to create shader module")
 }
+*/

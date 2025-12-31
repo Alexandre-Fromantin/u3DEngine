@@ -1,0 +1,43 @@
+use std::ffi::{CStr, c_char};
+
+use ash::vk;
+
+use crate::{glfw::GlfwEntry, vulkan::entry::VulkanEntry};
+
+pub struct VulkanInstance {
+    instance: ash::Instance,
+}
+
+static VALIDATION_LAYER_NAME_C: &CStr = c"VK_LAYER_KHRONOS_validation";
+static VALIDATION_LAYER_NAME: &str = match VALIDATION_LAYER_NAME_C.to_str() {
+    Ok(v) => v,
+    Err(_) => panic!("VALIDATION_LAYER_NAME_C.to_str() failed"),
+};
+
+const VULKAN_INSTANCE_LAYER_NAMES_C: [*const c_char; 1] =
+    [VALIDATION_LAYER_NAME_C.as_ptr() as *const c_char];
+
+const VULKAN_INSTANCE_LAYER_NAMES: [&str; 1] = [VALIDATION_LAYER_NAME];
+
+impl VulkanInstance {
+    pub fn new_from_glfw(vulkan_entry: &VulkanEntry, glfw_entry: &GlfwEntry) -> Self {
+        let app_info = vk::ApplicationInfo::default();
+
+        if !vulkan_entry.is_extensions_supported(&glfw_entry.all_req_vk_inst_ext_names) {
+            panic!("one or more requested extensions aren't supported by Vulkan")
+        }
+
+        if !vulkan_entry.is_layers_supported(&VULKAN_INSTANCE_LAYER_NAMES) {
+            panic!("one or more requested layers aren't supported by Vulkan")
+        }
+
+        let instance_create_info = vk::InstanceCreateInfo::default()
+            .application_info(&app_info)
+            .enabled_layer_names(&VULKAN_INSTANCE_LAYER_NAMES_C)
+            .enabled_extension_names(glfw_entry.all_req_vk_inst_ext_names_c);
+
+        let instance = unsafe { vulkan_entry.create_instance(&instance_create_info, None) }
+            .expect("failed to create Vulkan instance");
+        Self { instance }
+    }
+}
