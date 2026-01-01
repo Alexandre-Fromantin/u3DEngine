@@ -3,12 +3,15 @@ use std::{
     ops::Deref,
 };
 
-use ash::vk;
+use ash::{khr, vk};
 
 use crate::{glfw::GlfwEntry, vulkan::entry::VulkanEntry};
 
 pub struct VulkanInstance {
     instance: ash::Instance,
+
+    pub surface_instance: khr::surface::Instance,
+    pub win32_surface_instance: khr::win32_surface::Instance,
 }
 
 static VALIDATION_LAYER_NAME_C: &CStr = c"VK_LAYER_KHRONOS_validation";
@@ -41,7 +44,15 @@ impl VulkanInstance {
 
         let instance = unsafe { vulkan_entry.create_instance(&instance_create_info, None) }
             .expect("failed to create Vulkan instance");
-        Self { instance }
+
+        let surface_instance = khr::surface::Instance::new(vulkan_entry, &instance);
+        let win32_surface_instance = khr::win32_surface::Instance::new(vulkan_entry, &instance);
+
+        Self {
+            instance,
+            surface_instance,
+            win32_surface_instance,
+        }
     }
 }
 
