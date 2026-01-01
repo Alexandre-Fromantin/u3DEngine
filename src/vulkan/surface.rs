@@ -3,12 +3,16 @@ use glfw::PWindow;
 
 use crate::vulkan::instance::VulkanInstance;
 
-pub struct VulkanSurface {
+pub struct VulkanSurface<'vulkan_instance> {
+    vulkan_instance: &'vulkan_instance VulkanInstance,
     surface: vk::SurfaceKHR,
 }
 
-impl VulkanSurface {
-    pub fn new_from_glfw_window(vulkan_instance: &VulkanInstance, glfw_window: &PWindow) -> Self {
+impl<'vulkan_instance> VulkanSurface<'vulkan_instance> {
+    pub fn new_from_glfw_window(
+        vulkan_instance: &'vulkan_instance VulkanInstance,
+        glfw_window: &PWindow,
+    ) -> Self {
         let hwnd = glfw_window.get_win32_window() as isize;
         let surface_create_info = vk::Win32SurfaceCreateInfoKHR {
             hwnd,
@@ -21,17 +25,19 @@ impl VulkanSurface {
         }
         .expect("failed to create Vulkan surface(SurfaceKHR)");
 
-        Self { surface }
+        Self {
+            vulkan_instance,
+            surface,
+        }
     }
 
     pub fn is_a_supported_device_queue(
         &self,
-        vulkan_instance: &VulkanInstance,
         physical_device: vk::PhysicalDevice,
         queue_family_index: u32,
     ) -> bool {
         unsafe {
-            vulkan_instance
+            self.vulkan_instance
                 .win32_surface_instance
                 .get_physical_device_win32_presentation_support(physical_device, queue_family_index)
         }
@@ -39,11 +45,10 @@ impl VulkanSurface {
 
     pub fn get_available_present_modes(
         &self,
-        vulkan_instance: &VulkanInstance,
         physical_device: vk::PhysicalDevice,
     ) -> Vec<vk::PresentModeKHR> {
         unsafe {
-            vulkan_instance
+            self.vulkan_instance
                 .surface_instance
                 .get_physical_device_surface_present_modes(physical_device, self.surface)
         }
@@ -52,11 +57,10 @@ impl VulkanSurface {
 
     pub fn get_available_formats(
         &self,
-        vulkan_instance: &VulkanInstance,
         physical_device: vk::PhysicalDevice,
     ) -> Vec<vk::SurfaceFormatKHR> {
         unsafe {
-            vulkan_instance
+            self.vulkan_instance
                 .surface_instance
                 .get_physical_device_surface_formats(physical_device, self.surface)
         }
@@ -65,14 +69,23 @@ impl VulkanSurface {
 
     pub fn get_available_capabilities(
         &self,
-        vulkan_instance: &VulkanInstance,
         physical_device: vk::PhysicalDevice,
     ) -> vk::SurfaceCapabilitiesKHR {
         unsafe {
-            vulkan_instance
+            self.vulkan_instance
                 .surface_instance
                 .get_physical_device_surface_capabilities(physical_device, self.surface)
         }
         .expect("failed to get available present capabilities for surface")
+    }
+}
+
+impl<'a> Drop for VulkanSurface<'a> {
+    fn drop(&mut self) {
+        unsafe {
+            self.vulkan_instance
+                .surface_instance
+                .destroy_surface(self.surface, None)
+        };
     }
 }

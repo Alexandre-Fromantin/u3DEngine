@@ -135,26 +135,23 @@ impl VulkanDevice {
 
     pub fn get_available_present_modes_for_surface(
         &self,
-        vulkan_instance: &VulkanInstance,
         surface: &VulkanSurface,
     ) -> Vec<vk::PresentModeKHR> {
-        surface.get_available_present_modes(vulkan_instance, self.physical_device)
+        surface.get_available_present_modes(self.physical_device)
     }
 
     pub fn get_available_formats_for_surface(
         &self,
-        vulkan_instance: &VulkanInstance,
         surface: &VulkanSurface,
     ) -> Vec<vk::SurfaceFormatKHR> {
-        surface.get_available_formats(vulkan_instance, self.physical_device)
+        surface.get_available_formats(self.physical_device)
     }
 
     pub fn get_available_capabilities_for_surface(
         &self,
-        vulkan_instance: &VulkanInstance,
         surface: &VulkanSurface,
     ) -> vk::SurfaceCapabilitiesKHR {
-        surface.get_available_capabilities(vulkan_instance, self.physical_device)
+        surface.get_available_capabilities(self.physical_device)
     }
 }
 
@@ -214,11 +211,7 @@ impl GraphicsAndPresentQueueFamilyId {
             }
 
             if presents_queue_family_id_opt.is_none()
-                && surface.is_a_supported_device_queue(
-                    vulkan_instance,
-                    physical_device,
-                    queue_family_id as u32,
-                )
+                && surface.is_a_supported_device_queue(physical_device, queue_family_id as u32)
             {
                 presents_queue_family_id_opt = Some(queue_family_id as u32);
             }

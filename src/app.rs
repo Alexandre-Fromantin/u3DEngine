@@ -12,8 +12,6 @@ use crate::{
 pub struct Application {
     glfw_window: PWindow,
     glfw_events: GlfwReceiver<(f64, WindowEvent)>,
-    vulkan_surface: VulkanSurface,
-    vulkan_instance: VulkanInstance,
 }
 
 impl Application {
@@ -51,8 +49,6 @@ impl Application {
         Application {
             glfw_window: window,
             glfw_events: events,
-            vulkan_surface,
-            vulkan_instance,
         }
     }
 

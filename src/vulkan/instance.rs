@@ -56,6 +56,12 @@ impl VulkanInstance {
     }
 }
 
+impl Drop for VulkanInstance {
+    fn drop(&mut self) {
+        unsafe { self.instance.destroy_instance(None) };
+    }
+}
+
 impl Deref for VulkanInstance {
     type Target = ash::Instance;
 
