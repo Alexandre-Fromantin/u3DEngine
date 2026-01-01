@@ -132,6 +132,27 @@ impl VulkanDevice {
         }
         None
     }
+
+    pub fn get_available_present_modes_for_surface(
+        &self,
+        surface: &VulkanSurface,
+    ) -> Vec<vk::PresentModeKHR> {
+        surface.get_available_present_modes(self.physical_device)
+    }
+
+    pub fn get_available_formats_for_surface(
+        &self,
+        surface: &VulkanSurface,
+    ) -> Vec<vk::SurfaceFormatKHR> {
+        surface.get_available_formats(self.physical_device)
+    }
+
+    pub fn get_available_capabilities_for_surface(
+        &self,
+        surface: &VulkanSurface,
+    ) -> vk::SurfaceCapabilitiesKHR {
+        surface.get_available_capabilities(self.physical_device)
+    }
 }
 
 fn is_physical_device_supported_extensions(
