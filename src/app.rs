@@ -4,7 +4,9 @@ use glfw::{GlfwReceiver, PWindow, WindowEvent, WindowMode};
 
 use crate::{
     glfw::GlfwEntry,
-    vulkan::{entry::VulkanEntry, instance::VulkanInstance, surface::VulkanSurface},
+    vulkan::{
+        device::VulkanDevice, entry::VulkanEntry, instance::VulkanInstance, surface::VulkanSurface,
+    },
 };
 
 pub struct Application {
@@ -42,6 +44,10 @@ impl Application {
 
         let vulkan_surface =
             VulkanSurface::new_from_glfw_window(vulkan_entry, &vulkan_instance, &window);
+
+        let vulkan_device =
+            VulkanDevice::select_suitable_device_for_surface(&vulkan_instance, &vulkan_surface)
+                .expect("failed to select suitable device for surface");
 
         Application {
             glfw_window: window,

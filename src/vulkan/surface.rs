@@ -1,5 +1,5 @@
 use ash::khr::win32_surface;
-use ash::vk;
+use ash::vk::{self, PhysicalDevice};
 use glfw::PWindow;
 
 use crate::vulkan::entry::VulkanEntry;
@@ -30,6 +30,17 @@ impl VulkanSurface {
         Self {
             win32_surface_instance,
             surface,
+        }
+    }
+
+    pub fn is_a_supported_device_queue(
+        &self,
+        physical_device: PhysicalDevice,
+        queue_family_index: u32,
+    ) -> bool {
+        unsafe {
+            self.win32_surface_instance
+                .get_physical_device_win32_presentation_support(physical_device, queue_family_index)
         }
     }
 }
