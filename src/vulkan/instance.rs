@@ -3,11 +3,7 @@ use std::{
     ops::Deref,
 };
 
-use ash::{
-    khr,
-    prelude::VkResult,
-    vk::{self, Win32SurfaceCreateInfoKHR},
-};
+use ash::{khr, prelude::VkResult, vk};
 
 use crate::{glfw::GlfwEntry, vulkan::entry::VulkanEntry};
 
@@ -65,7 +61,7 @@ impl VulkanInstance {
     ) -> VkResult<vk::SurfaceKHR> {
         unsafe {
             self.win32_surface_instance
-                .create_win32_surface(&surface_create_info, None)
+                .create_win32_surface(surface_create_info, None)
         }
     }
 
