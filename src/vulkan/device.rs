@@ -20,8 +20,12 @@ pub struct SuitableDeviceParam<T> {
     must_have: T,
 }*/
 
+///Represent the queues of a Logical Device, which are used for graphics and presentations supported for a Vulkan Surface
 enum DeviceQueue {
+    ///The graphics and representation are used in the same Logical Queue, because they have the same family queue
     UniqueQueue(vk::Queue),
+
+    ///The graphics and representation each have a dedicated queue, because they have different family queues
     TwoQueue {
         queue_family_indices: [u32; 2],
         graphics: vk::Queue,
@@ -29,10 +33,22 @@ enum DeviceQueue {
     },
 }
 
+///Represent a Vulkan device
 pub struct VulkanDevice {
+    ///A Vulkan Physical Device
+    ///
+    ///For example, a reference to an RTX 5090
     physical_device: vk::PhysicalDevice,
+
+    ///A Vulkan Logical Device, which created by Vulkan and linked to ```physical_device```
     logical_device: ash::Device,
+
+    ///The queues of ```logical_device```, which are used for graphics and presentations supported for a Vulkan Surface
     queue: DeviceQueue,
+
+    ///The Swapchain Device linked to Vulkan instance and ```logical_device```
+    ///
+    ///For example, can be used to create a swapchain
     swapchain_device: khr::swapchain::Device,
 }
 

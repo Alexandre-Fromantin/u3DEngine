@@ -10,9 +10,17 @@ const SUITABLE_SURFACE_FORMAT: vk::SurfaceFormatKHR = vk::SurfaceFormatKHR {
     color_space: vk::ColorSpaceKHR::SRGB_NONLINEAR,
 };
 
+///Represent a Vulkan Swapchain
 pub struct VulkanSwapchain<'vulkan_instance, 'vulkan_device, 'vulkan_surface> {
+    ///The Vulkan Swapchain
     swapchain: SwapchainKHR,
+
+    ///A reference to the Vulkan Device which created this swapchain
+    ///
+    ///For example, can be used to destroy this swapchain
     vulkan_device: &'vulkan_device VulkanDevice,
+
+    ///PhantomData used to keep the fact that a Swapchain cannot be used without its surface
     phantom_data_surface: PhantomData<&'vulkan_surface VulkanSurface<'vulkan_instance>>,
 }
 

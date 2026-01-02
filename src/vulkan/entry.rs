@@ -1,8 +1,14 @@
 use std::{ffi::CStr, ops::Deref};
 
+///Represent the Vulkan library entry point.
 pub struct VulkanEntry {
+    ///The Ash entry point.
     entry: ash::Entry,
+
+    ///All available extension names of the Vulkan library.
     all_available_extension_names: Box<[Box<str>]>,
+
+    ///All available layer names of the Vulkan library.
     all_available_layer_names: Box<[Box<str>]>,
 }
 

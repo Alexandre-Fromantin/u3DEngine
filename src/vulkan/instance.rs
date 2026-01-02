@@ -7,10 +7,19 @@ use ash::{khr, prelude::VkResult, vk};
 
 use crate::{glfw::GlfwEntry, vulkan::entry::VulkanEntry};
 
+///Represent a Vulkan Instance
 pub struct VulkanInstance {
+    ///The Vulkan instance
     instance: ash::Instance,
 
+    ///The Surface Instance linked to Vulkan instance
+    ///
+    ///For example, can be used to destroy a SurfaceKHR
     surface_instance: khr::surface::Instance,
+
+    ///The Win32 Surface Instance linked to Vulkan instance (usable only for Windows)
+    ///
+    ///For example, can be used to create a SurfaceKHR supported by Windows
     win32_surface_instance: khr::win32_surface::Instance,
 }
 

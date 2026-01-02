@@ -3,8 +3,12 @@ use glfw::PWindow;
 
 use crate::vulkan::instance::VulkanInstance;
 
+///Represent a Vulkan surface
 pub struct VulkanSurface<'vulkan_instance> {
+    ///A reference to the Vulkan instance which created this surface
     vulkan_instance: &'vulkan_instance VulkanInstance,
+
+    ///The Vulkan surface
     surface: vk::SurfaceKHR,
 }
 
