@@ -3,7 +3,10 @@ use std::{
     mem::MaybeUninit,
 };
 
-use ash::vk::{self, QueueFlags};
+use ash::{
+    khr,
+    vk::{self, QueueFlags},
+};
 
 use crate::vulkan::{instance::VulkanInstance, surface::VulkanSurface};
 
@@ -20,6 +23,7 @@ pub struct SuitableDeviceParam<T> {
 enum DeviceQueue {
     UniqueQueue(vk::Queue),
     TwoQueue {
+        queue_family_indices: [u32; 2],
         graphics: vk::Queue,
         presents: vk::Queue,
     },
@@ -29,6 +33,7 @@ pub struct VulkanDevice {
     physical_device: vk::PhysicalDevice,
     logical_device: ash::Device,
     queue: DeviceQueue,
+    swapchain_device: khr::swapchain::Device,
 }
 
 const REQUIRED_EXTENSION_NAME_FOR_SURFACE: [&CStr; 1] = [vk::KHR_SWAPCHAIN_NAME];
@@ -116,6 +121,10 @@ impl VulkanDevice {
                     )
                 } else {
                     DeviceQueue::TwoQueue {
+                        queue_family_indices: [
+                            graphics_presents_queue_family_id.graphics,
+                            graphics_presents_queue_family_id.presents,
+                        ],
                         graphics: logical_device
                             .get_device_queue(graphics_presents_queue_family_id.graphics, 0),
                         presents: logical_device
@@ -124,10 +133,13 @@ impl VulkanDevice {
                 }
             };
 
+            let swapchain_device = khr::swapchain::Device::new(vulkan_instance, &logical_device);
+
             return Some(Self {
                 logical_device,
                 physical_device,
                 queue,
+                swapchain_device,
             });
         }
         None
@@ -152,6 +164,40 @@ impl VulkanDevice {
         surface: &VulkanSurface,
     ) -> vk::SurfaceCapabilitiesKHR {
         surface.get_available_capabilities(self.physical_device)
+    }
+
+    pub fn create_swapchain(
+        &self,
+        swapchain_create_info: &mut vk::SwapchainCreateInfoKHR,
+    ) -> vk::SwapchainKHR {
+        if let DeviceQueue::TwoQueue {
+            queue_family_indices,
+            graphics: _,
+            presents: _,
+        } = &self.queue
+        {
+            swapchain_create_info.image_sharing_mode = vk::SharingMode::EXCLUSIVE;
+            swapchain_create_info.queue_family_index_count = 2;
+            swapchain_create_info.p_queue_family_indices = queue_family_indices.as_ptr();
+        } else {
+            swapchain_create_info.image_sharing_mode = vk::SharingMode::EXCLUSIVE;
+        }
+
+        unsafe {
+            self.swapchain_device
+                .create_swapchain(swapchain_create_info, None)
+        }
+        .expect("failed to create Vulkan SwapchainHKR")
+    }
+
+    pub fn destroy_swapchain(&self, swapchain: vk::SwapchainKHR) {
+        unsafe { self.swapchain_device.destroy_swapchain(swapchain, None) };
+    }
+}
+
+impl Drop for VulkanDevice {
+    fn drop(&mut self) {
+        unsafe { self.logical_device.destroy_device(None) };
     }
 }
 

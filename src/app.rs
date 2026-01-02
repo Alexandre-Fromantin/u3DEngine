@@ -6,6 +6,7 @@ use crate::{
     glfw::GlfwEntry,
     vulkan::{
         device::VulkanDevice, entry::VulkanEntry, instance::VulkanInstance, surface::VulkanSurface,
+        swapchain::VulkanSwapchain,
     },
 };
 
@@ -45,6 +46,9 @@ impl Application {
         let vulkan_device =
             VulkanDevice::select_suitable_device_for_surface(&vulkan_instance, &vulkan_surface)
                 .expect("failed to select suitable device for surface");
+
+        let vulkan_swapchain =
+            VulkanSwapchain::new_from_device_and_surface(&vulkan_device, &vulkan_surface);
 
         Application {
             glfw_window: window,

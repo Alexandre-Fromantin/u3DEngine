@@ -78,6 +78,13 @@ impl<'vulkan_instance> VulkanSurface<'vulkan_instance> {
         }
         .expect("failed to get available present capabilities for surface")
     }
+
+    pub fn set_surface_in_swapchain_create_info_khr(
+        &self,
+        swapchain_create_info: &mut vk::SwapchainCreateInfoKHR,
+    ) {
+        swapchain_create_info.surface = self.surface
+    }
 }
 
 impl<'a> Drop for VulkanSurface<'a> {
