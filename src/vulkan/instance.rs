@@ -3,15 +3,19 @@ use std::{
     ops::Deref,
 };
 
-use ash::{khr, vk};
+use ash::{
+    khr,
+    prelude::VkResult,
+    vk::{self, Win32SurfaceCreateInfoKHR},
+};
 
 use crate::{glfw::GlfwEntry, vulkan::entry::VulkanEntry};
 
 pub struct VulkanInstance {
     instance: ash::Instance,
 
-    pub surface_instance: khr::surface::Instance,
-    pub win32_surface_instance: khr::win32_surface::Instance,
+    surface_instance: khr::surface::Instance,
+    win32_surface_instance: khr::win32_surface::Instance,
 }
 
 static VALIDATION_LAYER_NAME_C: &CStr = c"VK_LAYER_KHRONOS_validation";
@@ -53,6 +57,64 @@ impl VulkanInstance {
             surface_instance,
             win32_surface_instance,
         }
+    }
+
+    pub fn create_win32_surface(
+        &self,
+        surface_create_info: &vk::Win32SurfaceCreateInfoKHR,
+    ) -> VkResult<vk::SurfaceKHR> {
+        unsafe {
+            self.win32_surface_instance
+                .create_win32_surface(&surface_create_info, None)
+        }
+    }
+
+    pub fn get_physical_device_win32_presentation_support(
+        &self,
+        physical_device: vk::PhysicalDevice,
+        queue_family_index: u32,
+    ) -> bool {
+        unsafe {
+            self.win32_surface_instance
+                .get_physical_device_win32_presentation_support(physical_device, queue_family_index)
+        }
+    }
+
+    pub fn get_physical_device_surface_present_modes(
+        &self,
+        physical_device: vk::PhysicalDevice,
+        surface: vk::SurfaceKHR,
+    ) -> VkResult<Vec<vk::PresentModeKHR>> {
+        unsafe {
+            self.surface_instance
+                .get_physical_device_surface_present_modes(physical_device, surface)
+        }
+    }
+
+    pub fn get_physical_device_surface_formats(
+        &self,
+        physical_device: vk::PhysicalDevice,
+        surface: vk::SurfaceKHR,
+    ) -> VkResult<Vec<vk::SurfaceFormatKHR>> {
+        unsafe {
+            self.surface_instance
+                .get_physical_device_surface_formats(physical_device, surface)
+        }
+    }
+
+    pub fn get_physical_device_surface_capabilities(
+        &self,
+        physical_device: vk::PhysicalDevice,
+        surface: vk::SurfaceKHR,
+    ) -> VkResult<vk::SurfaceCapabilitiesKHR> {
+        unsafe {
+            self.surface_instance
+                .get_physical_device_surface_capabilities(physical_device, surface)
+        }
+    }
+
+    pub fn destroy_surface(&self, surface: vk::SurfaceKHR) {
+        unsafe { self.surface_instance.destroy_surface(surface, None) }
     }
 }
 

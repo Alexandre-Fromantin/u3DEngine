@@ -18,12 +18,9 @@ impl<'vulkan_instance> VulkanSurface<'vulkan_instance> {
             hwnd,
             ..Default::default()
         };
-        let surface = unsafe {
-            vulkan_instance
-                .win32_surface_instance
-                .create_win32_surface(&surface_create_info, None)
-        }
-        .expect("failed to create Vulkan surface(SurfaceKHR)");
+        let surface = vulkan_instance
+            .create_win32_surface(&surface_create_info)
+            .expect("failed to create Vulkan surface(SurfaceKHR)");
 
         Self {
             vulkan_instance,
@@ -36,47 +33,35 @@ impl<'vulkan_instance> VulkanSurface<'vulkan_instance> {
         physical_device: vk::PhysicalDevice,
         queue_family_index: u32,
     ) -> bool {
-        unsafe {
-            self.vulkan_instance
-                .win32_surface_instance
-                .get_physical_device_win32_presentation_support(physical_device, queue_family_index)
-        }
+        self.vulkan_instance
+            .get_physical_device_win32_presentation_support(physical_device, queue_family_index)
     }
 
     pub fn get_available_present_modes(
         &self,
         physical_device: vk::PhysicalDevice,
     ) -> Vec<vk::PresentModeKHR> {
-        unsafe {
-            self.vulkan_instance
-                .surface_instance
-                .get_physical_device_surface_present_modes(physical_device, self.surface)
-        }
-        .expect("failed to get available present modes for surface")
+        self.vulkan_instance
+            .get_physical_device_surface_present_modes(physical_device, self.surface)
+            .expect("failed to get available present modes for surface")
     }
 
     pub fn get_available_formats(
         &self,
         physical_device: vk::PhysicalDevice,
     ) -> Vec<vk::SurfaceFormatKHR> {
-        unsafe {
-            self.vulkan_instance
-                .surface_instance
-                .get_physical_device_surface_formats(physical_device, self.surface)
-        }
-        .expect("failed to get available present formats for surface")
+        self.vulkan_instance
+            .get_physical_device_surface_formats(physical_device, self.surface)
+            .expect("failed to get available present formats for surface")
     }
 
     pub fn get_available_capabilities(
         &self,
         physical_device: vk::PhysicalDevice,
     ) -> vk::SurfaceCapabilitiesKHR {
-        unsafe {
-            self.vulkan_instance
-                .surface_instance
-                .get_physical_device_surface_capabilities(physical_device, self.surface)
-        }
-        .expect("failed to get available present capabilities for surface")
+        self.vulkan_instance
+            .get_physical_device_surface_capabilities(physical_device, self.surface)
+            .expect("failed to get available present capabilities for surface")
     }
 
     pub fn set_surface_in_swapchain_create_info_khr(
@@ -89,10 +74,6 @@ impl<'vulkan_instance> VulkanSurface<'vulkan_instance> {
 
 impl<'a> Drop for VulkanSurface<'a> {
     fn drop(&mut self) {
-        unsafe {
-            self.vulkan_instance
-                .surface_instance
-                .destroy_surface(self.surface, None)
-        };
+        self.vulkan_instance.destroy_surface(self.surface);
     }
 }
