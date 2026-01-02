@@ -85,6 +85,7 @@ impl VulkanInstance {
         }
     }
 
+    ///Return all available present modes supported by `physical_device` and `surface`
     pub fn get_physical_device_surface_present_modes(
         &self,
         physical_device: vk::PhysicalDevice,
@@ -96,6 +97,7 @@ impl VulkanInstance {
         }
     }
 
+    ///Return all available formats supported by `physical_device` and `surface`
     pub fn get_physical_device_surface_formats(
         &self,
         physical_device: vk::PhysicalDevice,
@@ -107,6 +109,7 @@ impl VulkanInstance {
         }
     }
 
+    ///Return capabilities of `physical_device` and `surface`
     pub fn get_physical_device_surface_capabilities(
         &self,
         physical_device: vk::PhysicalDevice,

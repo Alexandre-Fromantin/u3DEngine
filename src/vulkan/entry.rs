@@ -13,6 +13,7 @@ pub struct VulkanEntry {
 }
 
 impl VulkanEntry {
+    /// Init Vulkan library on compile time and load all available extension names and layer names in VulkanEntry
     pub fn init() -> Self {
         let entry = ash::Entry::linked();
 
@@ -26,6 +27,11 @@ impl VulkanEntry {
         }
     }
 
+    /// Return if the `extension_names` are supported by Vulkan library
+    ///
+    /// # Arguments
+    ///
+    /// * `extension_names` - Slice of all extension names to check
     pub fn is_extensions_supported(&self, extension_names: &[&str]) -> bool {
         for extension_name in extension_names.iter().cloned() {
             let mut found = false;
@@ -43,6 +49,11 @@ impl VulkanEntry {
         true
     }
 
+    /// Return if the `layer_names` are supported by Vulkan library
+    ///
+    /// # Arguments
+    ///
+    /// * `layer_names` - Slice of all layer names to check
     pub fn is_layers_supported(&self, layer_names: &[&str]) -> bool {
         for layer_name in layer_names.iter().cloned() {
             let mut found = false;
@@ -69,6 +80,11 @@ impl Deref for VulkanEntry {
     }
 }
 
+///Return all available extension names of a ash::Entry
+///
+/// # Arguments
+///
+/// * `entry` - the ash::Entry reference
 fn load_all_available_extension_names(entry: &ash::Entry) -> Box<[Box<str>]> {
     let all_available_extension_properties =
         unsafe { entry.enumerate_instance_extension_properties(None) }
@@ -89,6 +105,11 @@ fn load_all_available_extension_names(entry: &ash::Entry) -> Box<[Box<str>]> {
     all_available_extension_names.into_boxed_slice()
 }
 
+///Return all available layer names of a ash::Entry
+///
+/// # Arguments
+///
+/// * `entry` - the ash::Entry reference
 fn load_all_available_layer_names(entry: &ash::Entry) -> Box<[Box<str>]> {
     let all_available_layer_properties_vec = unsafe { entry.enumerate_instance_layer_properties() }
         .expect("failed to get available Vulkan layer extension");

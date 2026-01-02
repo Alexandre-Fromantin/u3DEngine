@@ -55,6 +55,18 @@ pub struct VulkanDevice {
 const REQUIRED_EXTENSION_NAME_FOR_SURFACE: [&CStr; 1] = [vk::KHR_SWAPCHAIN_NAME];
 
 impl VulkanDevice {
+    /// Create a VulkanDevice containing a physical and a logical device, the queues necessary to `surface`, and a swapchain device for managing future swapchains created from this VulkanDevice
+    ///
+    /// It's created to be usable with `surface`
+    ///
+    /// # Arguments
+    ///
+    /// * `vulkan_instance` - a reference to a VulkanInstance
+    /// * `surface` - the VulkanDevice is created to be usable with this VulkanSurface ref
+    ///
+    /// # Returns
+    ///
+    /// None if none physical device can be used for this `surface`
     pub fn select_suitable_device_for_surface(
         vulkan_instance: &VulkanInstance,
         surface: &VulkanSurface,
@@ -161,6 +173,7 @@ impl VulkanDevice {
         None
     }
 
+    ///Return all available present modes supported by `&self` and `surface`
     pub fn get_available_present_modes_for_surface(
         &self,
         surface: &VulkanSurface,
@@ -168,6 +181,7 @@ impl VulkanDevice {
         surface.get_available_present_modes(self.physical_device)
     }
 
+    ///Return all available formats supported by `&self` and `surface`
     pub fn get_available_formats_for_surface(
         &self,
         surface: &VulkanSurface,
@@ -175,6 +189,7 @@ impl VulkanDevice {
         surface.get_available_formats(self.physical_device)
     }
 
+    ///Return capabilities of `&self` and `surface`
     pub fn get_available_capabilities_for_surface(
         &self,
         surface: &VulkanSurface,
@@ -182,6 +197,9 @@ impl VulkanDevice {
         surface.get_available_capabilities(self.physical_device)
     }
 
+    ///Create a SwapchainHKR from `&self` and `swapchain_create_info`
+    ///
+    ///The image_sharing_mode, queue_family_index_count and p_queue_family_indices fields of `swapchain_create_info` are updated from `&self` to create the Swapchain
     pub fn create_swapchain(
         &self,
         swapchain_create_info: &mut vk::SwapchainCreateInfoKHR,
@@ -206,6 +224,7 @@ impl VulkanDevice {
         .expect("failed to create Vulkan SwapchainHKR")
     }
 
+    ///Destroy `swapchain` with swapchain_device present in `&self`
     pub fn destroy_swapchain(&self, swapchain: vk::SwapchainKHR) {
         unsafe { self.swapchain_device.destroy_swapchain(swapchain, None) };
     }
@@ -217,6 +236,13 @@ impl Drop for VulkanDevice {
     }
 }
 
+/// Return if the `physical_device` supported `all_required_extension_names`
+///
+/// # Arguments
+///
+/// * `vulkan_instance` - a reference to a VulkanInstance
+/// * `physical_device` - a Vulkan physical devices
+/// * `all_required_extension_names` - Slice of all extension names to check
 fn is_physical_device_supported_extensions(
     vulkan_instance: &VulkanInstance,
     physical_device: vk::PhysicalDevice,

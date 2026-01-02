@@ -32,6 +32,7 @@ impl<'vulkan_instance> VulkanSurface<'vulkan_instance> {
         }
     }
 
+    ///Return all available present modes supported by `&self` and `physical_device`
     pub fn is_a_supported_device_queue(
         &self,
         physical_device: vk::PhysicalDevice,
@@ -41,6 +42,7 @@ impl<'vulkan_instance> VulkanSurface<'vulkan_instance> {
             .get_physical_device_win32_presentation_support(physical_device, queue_family_index)
     }
 
+    ///Return all available present modes supported by `&self` and `physical_device`
     pub fn get_available_present_modes(
         &self,
         physical_device: vk::PhysicalDevice,
@@ -50,6 +52,7 @@ impl<'vulkan_instance> VulkanSurface<'vulkan_instance> {
             .expect("failed to get available present modes for surface")
     }
 
+    ///Return all available formats supported by `&self` and `physical_device`
     pub fn get_available_formats(
         &self,
         physical_device: vk::PhysicalDevice,
@@ -59,6 +62,7 @@ impl<'vulkan_instance> VulkanSurface<'vulkan_instance> {
             .expect("failed to get available present formats for surface")
     }
 
+    ///Return capabilities of `&self` and `physical_device`
     pub fn get_available_capabilities(
         &self,
         physical_device: vk::PhysicalDevice,
