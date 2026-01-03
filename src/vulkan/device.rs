@@ -5,6 +5,7 @@ use std::{
 
 use ash::{
     khr,
+    prelude::VkResult,
     vk::{self, QueueFlags},
 };
 
@@ -227,6 +228,23 @@ impl VulkanDevice {
     ///Destroy `swapchain` with swapchain_device present in `&self`
     pub fn destroy_swapchain(&self, swapchain: vk::SwapchainKHR) {
         unsafe { self.swapchain_device.destroy_swapchain(swapchain, None) };
+    }
+
+    pub fn create_shader_module(
+        &self,
+        shader_module_create_info: &vk::ShaderModuleCreateInfo,
+    ) -> VkResult<vk::ShaderModule> {
+        unsafe {
+            self.logical_device
+                .create_shader_module(shader_module_create_info, None)
+        }
+    }
+
+    pub fn destroy_shader_module(&self, shader_module: vk::ShaderModule) {
+        unsafe {
+            self.logical_device
+                .destroy_shader_module(shader_module, None)
+        }
     }
 }
 

@@ -5,8 +5,8 @@ use glfw::{GlfwReceiver, PWindow, WindowEvent, WindowMode};
 use crate::{
     glfw::GlfwEntry,
     vulkan::{
-        device::VulkanDevice, entry::VulkanEntry, instance::VulkanInstance, surface::VulkanSurface,
-        swapchain::VulkanSwapchain,
+        device::VulkanDevice, entry::VulkanEntry, instance::VulkanInstance,
+        shaders::VulkanShaderModule, surface::VulkanSurface, swapchain::VulkanSwapchain,
     },
 };
 
@@ -49,6 +49,9 @@ impl Application {
 
         let vulkan_swapchain =
             VulkanSwapchain::new_from_device_and_surface(&vulkan_device, &vulkan_surface);
+
+        let vulkan_shader =
+            VulkanShaderModule::from_file(&vulkan_device, "shaders/spir-v/base.vert.spv");
 
         Application {
             glfw_window: window,
