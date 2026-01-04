@@ -1,12 +1,14 @@
 use std::{thread::sleep, time::Duration};
 
+use ash::vk::{self, Extent2D, Format};
 use glfw::{GlfwReceiver, PWindow, WindowEvent, WindowMode};
 
 use crate::{
     glfw::GlfwEntry,
     vulkan::{
-        device::VulkanDevice, entry::VulkanEntry, instance::VulkanInstance,
-        shaders::VulkanShaderModule, surface::VulkanSurface, swapchain::VulkanSwapchain,
+        device::VulkanDevice, entry::VulkanEntry, graphics_pipeline::VulkanGraphicsPipeline,
+        instance::VulkanInstance, shaders::VulkanShaderModule, surface::VulkanSurface,
+        swapchain::VulkanSwapchain,
     },
 };
 
@@ -50,8 +52,23 @@ impl Application {
         let vulkan_swapchain =
             VulkanSwapchain::new_from_device_and_surface(&vulkan_device, &vulkan_surface);
 
-        let vulkan_shader =
-            VulkanShaderModule::from_file(&vulkan_device, "shaders/spir-v/base.vert.spv");
+        let vulkan_shader_1 = VulkanShaderModule::from_file(
+            &vulkan_device,
+            "shaders/spir-v/base.vert.spv",
+            vk::ShaderStageFlags::VERTEX,
+        );
+        let vulkan_shader_2 = VulkanShaderModule::from_file(
+            &vulkan_device,
+            "shaders/spir-v/base.frag.spv",
+            vk::ShaderStageFlags::FRAGMENT,
+        );
+
+        let vulkan_graphics_pipeline = VulkanGraphicsPipeline::new(
+            &vulkan_device,
+            Extent2D::default().width(1920).height(1080),
+            Format::R8G8B8A8_SNORM,
+            &[vulkan_shader_1, vulkan_shader_2],
+        );
 
         Application {
             glfw_window: window,

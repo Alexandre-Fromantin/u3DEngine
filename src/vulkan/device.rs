@@ -6,7 +6,10 @@ use std::{
 use ash::{
     khr,
     prelude::VkResult,
-    vk::{self, QueueFlags},
+    vk::{
+        self, GraphicsPipelineCreateInfo, PipelineLayoutCreateInfo, QueueFlags,
+        RenderPassCreateInfo,
+    },
 };
 
 use crate::vulkan::{instance::VulkanInstance, surface::VulkanSurface};
@@ -245,6 +248,59 @@ impl VulkanDevice {
             self.logical_device
                 .destroy_shader_module(shader_module, None)
         }
+    }
+
+    pub fn create_pipeline_layout(
+        &self,
+        pipeline_layout_create_info: &PipelineLayoutCreateInfo,
+    ) -> VkResult<vk::PipelineLayout> {
+        unsafe {
+            self.logical_device
+                .create_pipeline_layout(pipeline_layout_create_info, None)
+        }
+    }
+
+    pub fn destroy_pipeline_layout(&self, pipeline_layout: vk::PipelineLayout) {
+        unsafe {
+            self.logical_device
+                .destroy_pipeline_layout(pipeline_layout, None)
+        }
+    }
+
+    pub fn create_render_pass(
+        &self,
+        render_pass_create_info: &RenderPassCreateInfo,
+    ) -> VkResult<vk::RenderPass> {
+        unsafe {
+            self.logical_device
+                .create_render_pass(render_pass_create_info, None)
+        }
+    }
+
+    pub fn destroy_render_pass(&self, render_pass: vk::RenderPass) {
+        unsafe { self.logical_device.destroy_render_pass(render_pass, None) }
+    }
+
+    pub fn create_graphics_pipeline(
+        &self,
+        graphics_pipeline_create_info: GraphicsPipelineCreateInfo,
+    ) -> VkResult<vk::Pipeline> {
+        let create_res = unsafe {
+            self.logical_device.create_graphics_pipelines(
+                vk::PipelineCache::null(),
+                &[graphics_pipeline_create_info],
+                None,
+            )
+        };
+
+        match create_res {
+            Ok(pipeline_vec) => Ok(pipeline_vec[0]),
+            Err(error) => Err(error.1),
+        }
+    }
+
+    pub fn destroy_pipeline(&self, pipeline: vk::Pipeline) {
+        unsafe { self.logical_device.destroy_pipeline(pipeline, None) }
     }
 }
 

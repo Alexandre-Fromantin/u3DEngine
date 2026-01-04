@@ -1,17 +1,24 @@
 use core::panic;
-use std::{fs::File, io::Read};
+use std::{ffi::CStr, fs::File, io::Read};
 
 use ash::vk;
 
 use crate::vulkan::device::VulkanDevice;
 
+const SHADER_ENTRYPOINT: &CStr = c"main";
+
 pub struct VulkanShaderModule<'vulkan_device> {
     vulkan_device: &'vulkan_device VulkanDevice,
     shader_module: vk::ShaderModule,
+    shader_state: vk::ShaderStageFlags,
 }
 
 impl<'vulkan_device> VulkanShaderModule<'vulkan_device> {
-    pub fn from_file(vulkan_device: &'vulkan_device VulkanDevice, file_path: &str) -> Self {
+    pub fn from_file(
+        vulkan_device: &'vulkan_device VulkanDevice,
+        file_path: &str,
+        shader_state: vk::ShaderStageFlags,
+    ) -> Self {
         let mut shader_file = File::open(file_path).unwrap();
         let mut shader_file_buf = Vec::new(); //TODO: Use a buffer pool
         shader_file.read_to_end(&mut shader_file_buf).unwrap();
@@ -30,7 +37,18 @@ impl<'vulkan_device> VulkanShaderModule<'vulkan_device> {
         VulkanShaderModule {
             vulkan_device,
             shader_module,
+            shader_state,
         }
+    }
+
+    pub fn set_pipeline_stage(
+        &self,
+        pipeline_shader_stage_create_info: &mut vk::PipelineShaderStageCreateInfo,
+    ) {
+        *pipeline_shader_stage_create_info = vk::PipelineShaderStageCreateInfo::default()
+            .stage(self.shader_state)
+            .module(self.shader_module)
+            .name(SHADER_ENTRYPOINT)
     }
 }
 
